@@ -31,6 +31,62 @@ class Employee:
         grossPay = self.hoursWorked*self.payRate + grossOTPay
         return grossPay
 
+def clear_screen():
+    print(chr(27) + "[H" + chr(27) + "[J")
+
+# function that prints out a menu of options to choose from
+def print_menu(current_menu, choices, prompt):
+    # begin with clearing the screen
+    clear_screen()
+    
+    #initialize local variables
+    header = "-"*20 + "Chris Autos" + "-"*20
+    slogan = "        Where you break it and we fix it!"
+    line_break = "-"*51
+    
+    #start printing the menu
+    print(header)
+    print(slogan)
+    print(line_break)
+    
+    # loop through the menu tree and display tree
+    for x in current_menu:
+        print(" => {}".format(x))
+    
+    print("\n")
+
+    #get number of choices
+    choice_count = len(choices)
+
+    # loop through the choices and print out the number of the
+    # choice with the choice next to it
+    for i in range(choice_count):
+        print("    ({0}) {1}".format(i+1, choices[i]))
+    
+    # print a new line and line break
+    print("\n{0}".format(line_break))
+    
+    # initialize user response to menu
+    user_response = 0
+
+    # input validation loop for user response
+    while user_response < 1 or user_response > choice_count:
+        try:
+            user_response = int(input("Type in a number (1-{0}): ".format(choice_count)))
+        except:
+            continue
+    return user_response
+        
+        
+
+def main():
+    
+    menus_selected = ["main"]
+
+    print_menu(menus_selected, ["Enter a new employee","Calculate employee weekly gross pay","Exit"],"What would you like to do? ")
+
+main()
+"""
 for i in range(1,6):
     if exitFlag == False: # exit program if exitFlag is set to True
         
@@ -56,4 +112,5 @@ if exitFlag == False: # only do below if not exiting the program
     totalPrice = totalSalesTax + subTotal
     print(f"The subtotal is:    {subTotal:10.2f}")
     print(f"The total tax is:   {totalSalesTax:10.2f}")
-    print(f"The grand total is: {totalPrice:10.2f}")            
+    print(f"The grand total is: {totalPrice:10.2f}")
+"""
