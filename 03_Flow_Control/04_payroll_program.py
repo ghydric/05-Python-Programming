@@ -99,8 +99,8 @@ def main():
         if user_main_selection == 1:
             print("You selected 1")
         elif user_main_selection == 2:
-            while user_calc_selection not in current_employees.employeeNum:
-                user_calc_selection = input("Please enter your employee number: ")
+            while user_calc_selection <= 0 or user_calc_selection > len(current_employees):
+                user_calc_selection = int(input("Please enter your employee number: "))
 
 main()
 """
