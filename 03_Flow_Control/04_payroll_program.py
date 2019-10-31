@@ -10,11 +10,11 @@ OT_MULTIPLIER = 1.5
 
 # Global Variables
 exitFlag = False # initialize exitFlag as false to not exit the program
-employees = {} # dictionary to hold all employees
+current_employees = [] # list to hold all current employees
 
 # Create Employee Class
 class Employee:
-    def _init_(self, employeeNum, firstName, lastName, payRate):
+    def __init__(self, employeeNum, firstName, lastName, payRate):
         self.employeeNum = employeeNum
         self.firstName = firstName
         self.lastName = lastName
@@ -33,6 +33,14 @@ class Employee:
 
 def clear_screen():
     print(chr(27) + "[H" + chr(27) + "[J")
+
+def create_current_employees():
+    emp1 = Employee(1, "Nancy", "Howard", 10.00)
+    emp2 = Employee(2, "Travis", "Kline", 12.00)
+    emp3 = Employee(3, "Brandon", "Hane", 15.00)
+    current_employees.insert(0,emp1)
+    current_employees.insert(1,emp2)
+    current_employees.insert(2,emp3)
 
 # function that prints out a menu of options to choose from
 def print_menu(current_menu, choices, prompt):
@@ -76,14 +84,23 @@ def print_menu(current_menu, choices, prompt):
         except:
             continue
     return user_response
-        
-        
+
 
 def main():
     
     menus_selected = ["main"]
-
-    print_menu(menus_selected, ["Enter a new employee","Calculate employee weekly gross pay","Exit"],"What would you like to do? ")
+    create_current_employees()
+    user_main_selection = 0
+    user_calc_selection = 0
+    # while loop to keep running the main menu until exit is selected
+    while user_main_selection != 3:
+        user_main_selection = print_menu(menus_selected, ["Enter a new employee","Calculate employee weekly gross pay","Exit"],"What would you like to do? ")
+        
+        if user_main_selection == 1:
+            print("You selected 1")
+        elif user_main_selection == 2:
+            while user_calc_selection not in current_employees.employeeNum:
+                user_calc_selection = input("Please enter your employee number: ")
 
 main()
 """
