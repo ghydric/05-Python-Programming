@@ -34,6 +34,8 @@ class Employee:
 def clear_screen():
     print(chr(27) + "[H" + chr(27) + "[J")
 
+# function that creates current employees from the Employee class
+# and adds them to a current_employees list
 def create_current_employees():
     emp1 = Employee(1, "Nancy", "Howard", 10.00)
     emp2 = Employee(2, "Travis", "Kline", 12.00)
