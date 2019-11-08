@@ -70,7 +70,7 @@ def create_word_bank(filepath):
     # close the file
     f.close()
 
-# function that reads a file (input as argument) and returns the word list
+# function that reads a text file (input as argument) and returns the word list
 def get_word_bank(filepath):
     # open file at filepath
     f = open(filepath, 'r')
@@ -85,60 +85,213 @@ def get_word_bank(filepath):
     #return the list
     return words
 
-# function that returns an encoded version of a word.
-# word is passed in as an argument.
-# can also take another argument of a single letter.
-def encode_word(input_word, guess = ''):
-    # initialize encoded word
-    word_encoded = ''
+# function that returns an underscore version of a word.
+# word and underscore version are passed in as arguments.
+# this word created as underscores is what is to be shown to user to guess.
+def make_spooky_word(chosen, spooky):
+    
     # loop through each letter in input word
-    for letter in input_word:
+    for letter in chosen:
         # if the letter is a dash or a space,
         # output the letter as it is with a space added
         if letter == '-' or letter == ' ':
-            word_encoded += (f'{letter} ')
-        # if the letter matches user guess,
-        # output the letter as it is with a space added
-        elif letter == guess:
-            word_encoded += (f'{letter} ')
+            spooky += (f'{letter} ')
+
         # output the letter as an underscore
         else:
-            word_encoded += (f'_ ')
+            spooky += (f'_ ')
     # strip the last space off the end of the encoded word
-    word_encoded = word_encoded.rstrip(' ')
+    spooky = spooky.rstrip(' ')
     # return the encoded word
-    return word_encoded
+    return spooky
 
+# function that returns a spaced version of the chosen word.
+# chosen word is passed in as an argument.
+# update_spooky_word uses this version for index reference to update the spooky word.
+def make_spaced_chosen_word(chosen):
+    # initialize spaced version of chosen word to null string
+    spaced_chosen = ''
+    # loop through each letter of chosen word and add letter
+    # with a space to spaced version
+    for letter in chosen:
+        spaced_chosen += f'{letter} '
+    # remove the final space off of spaced version
+    spaced_chosen = spaced_chosen.rstrip(' ')
+    # return the spaced version of chosen word
+    return spaced_chosen
+
+# function that updates the spooky word shown to player to guess
+def update_spooky_word(guess, spooky, chosen):
+    # make spooky a list to modify based on index
+    spooky_list = list(spooky)
+    # loop through each letter in chosen word
+    for index, value in enumerate(chosen):
+        # skip letters that are spaces
+        if chosen[index] == ' ':
+            continue
+        # if guess matches letter,
+        # then replace the same index of spooky word with guess
+        elif guess == chosen[index]:
+            spooky_list[index] = guess
+        # otherwise skip the letter
+        else:
+            continue
+    # change spooky list back into string
+    spooky = "".join(spooky_list)
+    print(spooky)
+    # return spooky word
+    return spooky
 
 # function that displays the game
-def display_game():
+def display_game(menu, spooky = '', incorrect = ''):
+    
+    if menu == 'launch':
+        print('                   HANGMAN')
+        print('----------------------------------------------')
+        print('Guess a letter of the alphabet to see if it')
+        print('is in the below mystery word that was chosen')
+        print('randomly. If your guess is not in the mystery')
+        print('word, you are that much closer to being hung!')
+        print('Guess incorrectly too many times and you lose!')
+        print('To win, guess all the letters in the mystery')
+        print('word without getting hung!')
+        print('')
+        print('To play: Enter "1"')
+        print('To exit: Enter "2"')
+        while True:
+            try:
+                choice = input('Choice: ')
+                if choice != '1' and choice != '2':
+                    print('Invalid choice.')
+                    continue
+                else:
+                    break
+            except:
+                continue
+        if choice == '1':
+            return True
+        else:
+            return False
 
+    elif menu == 'game_play':
+        print('                   HANGMAN')
+        print('----------------------------------------------')
+        print('')
+        print(f'    {spooky}')
+        print('')
+        print(f'Incorrect Guesses: {str(incorrect).strip("[]")}')
+        print('----------------------------------------------')
 
+    elif menu == 'won':
+        print('                   HANGMAN')
+        print('----------------------------------------------')
+        print('')
+        print(f'    {spooky}')
+        print('')
+        print('YOU WIN!!')
+        print('')
+    
+    elif menu == 'lost':
+        print('                   HANGMAN')
+        print('----------------------------------------------')
+        print('')
+        print('  The mystery word was:')
+        print(f'    {spooky}')
+        print('')
+        print('YOU DUN GOT HANGED!!')
+        print('')
+
+# function that gets the player's guess and validates it is
+# a single alphabetic character, then returns the uppercase version
+def get_player_guess():
+    # get a guess from the player
+    guess = input('Guess a single letter: ')
+    # loop while the guess is not a character
+    while guess.isalpha() == False:
+        print('Guess must be a letter of the alphabet!')
+        guess = input('Guess a single letter: ')
+    # loop while length of guess is not equal to 1
+    while len(guess) != 1:
+        guess = input('Too many letters, enter a single letter: ')
+    # return the uppercase version of the guess
+    return guess.upper()
+
+# function that takes the player's guess as input and checks
+# whether the guess is in the mystery word
+def check_guess_correct(guess, chosen):
+    if guess in chosen:
+        return True
+    else:
+        return False
 
 # main function
 def main():
-    # check if the name/email file exists already
-    # if not, create the dictionary, then save it to the filepath
-    if not path.exists(WORD_BANK_PATH):
-        try:
-            create_word_bank(WORD_BANK_PATH)
-        except:
-            print('An error occured creating the wordbank, exiting')
+    # play game until player chooses to exit at launch menu
+    while True:
+        # display the launch menu for the game
+        play = display_game(menu = 'launch')
+        
+        # exit the game if player chose not to play
+        if not play:
             exit()
-    
-    # try to retrieve the word bank
-    try:
-        word_bank = get_word_bank(WORD_BANK_PATH)
-    except:
-        print('An error occured retrieving the wordbank, exiting')
-        exit()
+        
+        # check if the word bank file exists already
+        # if not, create the word bank text file
+        if not path.exists(WORD_BANK_PATH):
+            try:
+                create_word_bank(WORD_BANK_PATH)
+            except:
+                print('An error occured creating the wordbank, exiting')
+                exit()
+        
+        # try to retrieve the word bank
+        try:
+            word_bank = get_word_bank(WORD_BANK_PATH)
+        except:
+            print('An error occured retrieving the wordbank, exiting')
+            exit()
+        
+        # let computer choose a word from the word bank
+        chosen_word = random.choice(word_bank)
+        
+        # create spaced version of chosen_word
+        spaced_chosen_word = make_spaced_chosen_word(chosen_word)
+        
+        # initialize spooky_word
+        spooky_word = ''
+        
+        # create spooky version (letters replaced with underscores) of chosen word
+        spooky_word = make_spooky_word(chosen_word, spooky_word)
 
-    # let computer choose a word from the word bank
-    rand_chosen_word = random.choice(word_bank)
+        # create empty list of incorrect guesses
+        list_inc_guesses = []
 
-    # create empty list of incorrect guesses
-    list_inc_guesses = []
-    
-    print(rand_chosen_word)
+        print(chosen_word)
+        print(spaced_chosen_word)
+        print(spooky_word)
+
+        # while the spooky word contains at least 1 underscore or
+        # the length of the incorrect guesses becomes greater than 7
+        # loop through game play
+        while '_' in spooky_word and len(list_inc_guesses) <= 7:
+            
+            display_game(menu = 'game_play', spooky = spooky_word, incorrect = list_inc_guesses)
+            user_input = get_player_guess()
+            valid = check_guess_correct(user_input, chosen_word)
+            if valid:
+                spooky_word = update_spooky_word(user_input, spooky_word, spaced_chosen_word)
+            elif user_input in list_inc_guesses:
+                print('Already guessed that.')
+                continue
+            else:
+                list_inc_guesses += user_input
+        
+        if len(list_inc_guesses) == 8:
+            display_game(menu = 'lost', spooky = spaced_chosen_word)
+            input('Press enter')
+            
+        else:
+            display_game(menu = 'won', spooky = spooky_word)
+            input('Press enter')
 
 main()
