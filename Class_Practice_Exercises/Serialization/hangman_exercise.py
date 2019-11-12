@@ -266,9 +266,10 @@ def main():
         # create empty list of incorrect guesses
         list_inc_guesses = []
 
-        print(chosen_word)
-        print(spaced_chosen_word)
-        print(spooky_word)
+        # testing
+        #print(chosen_word)
+        #print(spaced_chosen_word)
+        #print(spooky_word)
 
         # while the spooky word contains at least 1 underscore or
         # the length of the incorrect guesses becomes greater than 7
