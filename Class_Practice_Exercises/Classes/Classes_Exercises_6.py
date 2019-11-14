@@ -34,12 +34,36 @@ def create_initial_dict():
 
 # function that takes a dictionary and filepath as arguments and pickles
 # the dictionary to the filepath
-def save_file(emp_dict, file):
-    pickle.dump(emp_dict, file)
+def save_file(emp_dict, filepath):
+    output_file = open(filepath, 'wb') # create and open the filepath for writing binary
+    pickle.dump(emp_dict, output_file)
+    output_file.close()
 
 # function that clears the terminal screen
 def clear_screen():
     print(chr(27) + "[H" + chr(27) + "[J")
+
+# validate user input
+def validate_input(user_input, input_type, min='', max='', option='', emp_dict=''):
+    
+    if input_type == 'id' and option == 'find_existing_id':
+        if not user_input.isdigit() or \
+        len(user_input) != max or \
+        user_input == min or \
+        user_input not in emp_dict:
+            return False
+        else:
+            return True
+
+ 
+    elif input_type == 'number':
+        num_list = []
+        for i in range(min, max):
+            num_list.append(f'{i}')
+        if user_input not in num_list:
+            return False
+        else:
+            return True
 
 # function that prints out a menu of options to choose from
 def print_menu(menu_to_show, prompt, message = ''):
@@ -86,9 +110,8 @@ def print_menu(menu_to_show, prompt, message = ''):
             try:
                 user_response = int(input(prompt))
             except:
-                print('Invalid entry')
                 continue
-    # inf no choices are given, get the user input
+    # if no choices are given, get the user input
     else:
         user_response = input(prompt)
     return user_response
@@ -110,7 +133,7 @@ def main():
     # if not, create the dictionary, then save it to the filepath
     if not path.exists(DICT_FILE_PATH):
         emp_dict = create_initial_dict()
-        output_file = open(DICT_FILE_PATH, 'wb') #create and open the filepath for writing binary
+        output_file = open(DICT_FILE_PATH, 'wb') # create and open the filepath for writing binary
         save_file(emp_dict, output_file)
         output_file.close()
     
@@ -144,7 +167,7 @@ def main():
                 '4' : 'Delete an Employee',
                 '5' : 'Quit'
             }
-        },
+        }, 
         'lookup' : {
             'current' : ['Main','Lookup'],
             'message' : 'Enter an Employee ID to lookup.'
@@ -199,46 +222,51 @@ def main():
         
         # if user selects lookup employee by ID
         if user_selection == 1:
-            # show the lookup menu
-            emp_id = print_menu(menus['lookup'], 'ID: ')
-            # attempt to locate the id entered in the employee dictionary
-            exist = find_id(emp_id, emp_dict)
-            # loop while name entered was not in dictionary
-            while not exist:
-                # show the invalid name menu
-                user_input = print_menu(menus['invalid_id'], 'Enter "1" or "2": ')
-                while user_input != 1 and user_input != 2:
-                    user_input = print_menu(menus['invalid_id'], 'Invalid entry, enter "1" or "2": ')
-                if user_input == 1:
-                    # show the lookup menu
-                    emp_id = print_menu(menus['lookup'], 'ID: ')
-                    # attempt to locate the id entered in the employee dictionary
-                    exist = find_id(emp_id, emp_dict)
+            # while main_menu option not chosen
+            while not main_menu:
+                # show the lookup menu
+                emp_id = print_menu(menus['lookup'], 'ID: ')
+                # validate id input
+                valid_id = validate_input(emp_id, 'id', '00000', 5, 'find_existing_id', emp_dict)
+                # if not a valid id
+                if valid_id == False:
+                    user_input = ''
+                    # only options are 1 and 2, so keep displaying invalid menu until correct option is entered
+                    while str(user_input) != '1' and str(user_input) != '2':
+                        user_input = print_menu(menus['invalid_id'], 'Enter "1" or "2": ')
+                    # if user wants to try entering another id, go back to beginning of loop
+                    if user_input == '1':
+                        continue
+                    # if user wants to go back to main menu, set the option and break out of loop
+                    else:
+                        main_menu = True
+                        break
+                # if it was a valid id
                 else:
-                    # user entered 2 to go back to main menu
+                    # print out the employee data requested
+                    print_menu(
+                        menus['show_employee'], 
+                        'Press <enter> to go back to main menu.', 
+                        message = f'Employee Name: {emp_dict[emp_id].get_name()}\n' \
+                        f'Employee ID: {emp_dict[emp_id].get_id_number()}\n' \
+                        f'Employee Department: {emp_dict[emp_id].get_department()}\n' \
+                        f'Employee Job Title: {emp_dict[emp_id].get_job_title()}'
+                    )
+                    # break out of loop
                     main_menu = True
-                    break # break out of while loop
-
-            # only go to main_menu if main_menu set to True
+                    break
+            # if main_menu is chosen, go back to main menu loop
             if main_menu:
-                # show main menu
                 continue
-            # print out the employee data requested
-            print_menu(
-                menus['show_employee'], 
-                'Press <enter> to go back to main menu.', 
-                message = f'Employee Name: {emp_dict[emp_id].get_name()}\n' \
-                f'Employee ID: {emp_dict[emp_id].get_id_number()}\n' \
-                f'Employee Department: {emp_dict[emp_id].get_department()}\n' \
-                f'Employee Job Title: {emp_dict[emp_id].get_job_title()}'
-            )
 
         # if user selects add a new employee
         if user_selection == 2:
             # set correct to false
             correct = False
+            # loop while the information entered for new employee is not correct
             while not correct:
-                new_id = print_menu(menus['add_emp_id'], 'ID: ', 'Please enter the new\nemployee\'s ID.')
+                # get all new employee information with input validation
+                new_id = print_menu(menus['add_emp_id'], 'ID: ', 'Please enter the new\nemployee\'s 5 digit ID.')
                 while not new_id.isdigit():
                     new_id = print_menu(menus['add_emp_id'], 'ID: ', 'ID must be an integer\n5 digits long.')
                 while int(new_id) < 1 or len(new_id) != 5:
@@ -252,9 +280,36 @@ def main():
                     new_name = print_menu(menus['add_emp_name'], 'Name: ', 'Name must be alphabet characters.')
                 new_dept = print_menu(menus['add_emp_dept'], 'Department: ', 'Please enter the new\nemployee\'s job department.')
                 new_title = print_menu(menus['add_emp_title'], 'Job Title: ', 'Please enter the new\nemployee\'s job title.')
-                
-        #if user_selection == 4:
-        #    delete_user
+                # initialize user input out of loop
+                user_input = '0' 
+                # loop until user inputs a "1" to append to dictionary or 
+                # "2" to re-enter new employee information
+                while user_input != '1' and user_input != '2':
+                    # show all the employee information to verify before saving
+                    user_input = print_menu(
+                        menus['show_employee'],
+                        'If correct enter "1", else "2": ',
+                        message = f'Employee Name: {new_name}\n' \
+                        f'Employee ID: {new_id}\n' \
+                        f'Employee Department: {new_dept}\n' \
+                        f'Employee Job Title: {new_title}'
+                    )
+                # if information is not correct, restart entries
+                if user_input == '2':
+                    continue
+                # break out of while information is not correct loop
+                else:
+                    correct = True
+            # add employee to employee dictionary
+            emp_dict.update({new_id : Employee(new_name, new_id, new_dept, new_title)})
+            # save the dictionary before displaying main menu again
+            save_file(emp_dict, DICT_FILE_PATH)
+        if user_selection == 4:
+            user_input = '0'
+            while user_input not in emp_dict:
+                user_input = print_menu(menus['lookup'])
         #    user_selection = print_menu(menus['delete'], "Enter a name: ")
+    print('\nSaving database.')
+    save_file(emp_dict, DICT_FILE_PATH)
     print('\nExiting now.')
 main()
