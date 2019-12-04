@@ -1,4 +1,5 @@
 # This prints the running times for problem sizes that double, using a single loop
+# (Benchmarking)
 
 import time
 
